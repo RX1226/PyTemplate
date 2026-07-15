@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 
-hello_api = APIRouter(prefix="/api")
+router = APIRouter()
 
 
-@hello_api.get("/hello")
+@router.get("/hello")
 def hello() -> dict[str, str]:
     return {"message": "Hello from FastAPI!"}
