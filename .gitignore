@@ -1,0 +1,34 @@
+# --- Python ---
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.env
+__pycache__
+
+# --- Node/React/Electron ---
+node_modules/
+dist/
+dist-electron/
+build/
+.eslintcache
+*.log
+
+# --- IDE (PyCharm / VS Code) ---
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# --- OS ---
+Thumbs.db
+.DS_Store
+
+# --- modules --
+models/
+
+# --- Project Specific (產圖結果) ---
+outputs/
+temp_assets/
+*.bin
