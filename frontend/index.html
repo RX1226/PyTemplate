@@ -7,14 +7,17 @@
 </head>
 <body>
     <h1>Hello FastAPI</h1>
-    <button id="call-api">呼叫 API</button>
+    <button data-url="/api/hello">呼叫 API 1</button>
+    <button data-url="/api/api2">呼叫 API 2</button>
     <p id="result">尚未呼叫 API</p>
 
     <script>
-        document.querySelector("#call-api").addEventListener("click", async () => {
-            const response = await fetch("/api/hello");
-            const data = await response.json();
-            document.querySelector("#result").textContent = data.message;
+        document.querySelectorAll("button[data-url]").forEach((button) => {
+            button.addEventListener("click", async () => {
+                const response = await fetch(button.dataset.url);
+                const data = await response.json();
+                document.querySelector("#result").textContent = data.message;
+            });
         });
     </script>
 </body>
