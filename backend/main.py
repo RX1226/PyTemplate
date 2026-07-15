@@ -3,7 +3,8 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from backend.api import api2, hello_api
+from backend.api.api2 import api2
+from backend.api.hello import hello_api
 
 app = FastAPI()
 app.include_router(hello_api)
