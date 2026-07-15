@@ -7,5 +7,15 @@
 </head>
 <body>
     <h1>Hello FastAPI</h1>
+    <button id="call-api">呼叫 API</button>
+    <p id="result">尚未呼叫 API</p>
+
+    <script>
+        document.querySelector("#call-api").addEventListener("click", async () => {
+            const response = await fetch("/api/hello");
+            const data = await response.json();
+            document.querySelector("#result").textContent = data.message;
+        });
+    </script>
 </body>
 </html>
