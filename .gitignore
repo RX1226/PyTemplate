@@ -6,6 +6,7 @@ __pycache__/
 .pytest_cache/
 .env
 __pycache__
+*.db
 
 # --- Node/React/Electron ---
 node_modules/
@@ -26,7 +27,7 @@ Thumbs.db
 .DS_Store
 
 # --- modules --
-models/
+/models/
 
 # --- Project Specific (產圖結果) ---
 outputs/

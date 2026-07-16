@@ -1,20 +1,46 @@
-# FastAPI 最小雛形
-安裝套件：
-```powershell
-pip install -r requirements.txt
-```
-請在專案根目錄啟動：
-```powershell
-python -m uvicorn backend.main:app --reload
-``
-開啟 <http://127.0.0.1:8000>。
+# FastAPI + SQLite Demo
 
-## 開發模式一鍵啟動
-建立虛擬環境並安裝套件後，之後只需在專案根目錄執行：
+這個專案示範兩種類型的 API：
+
+- 純 API：不存取資料庫，例如 Hello API、API 2
+- DB API：操作 SQLite Database、Table 與 Item
+
+## 啟動
+
 ```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 python run_dev.py
 ```
-伺服器準備完成後，會自動開啟瀏覽器。
 
-新增一個最簡單的api, 可以從前端按按鈕呼叫
-要測測試api可以從http://127.0.0.1:8000/docs來執行
+啟動後會自動開啟 <http://127.0.0.1:8000>，API 文件位於 <http://127.0.0.1:8000/docs>。
+
+## 結構
+
+```text
+backend/
+├── api/
+│   ├── routes.py
+│   ├── http/
+│   │   ├── hello.py
+│   │   └── api2.py
+│   └── db/
+│       ├── database.py
+│       ├── table.py
+│       └── item.py
+└── db/
+    ├── database.py
+    ├── table.py
+    ├── dao/item_dao.py
+    └── models/item.py
+```
+
+`backend/api/http/` 放不存取 DB 的一般 API；`backend/api/db/` 放會存取 DB 的 API；`backend/db/` 負責實際資料庫操作。
+
+Item 欄位：
+
+- `name`：String，必填
+- `quantity`：Integer，選填，預設 `0`
+- `price`：Float，選填，預設 `0`
+- `is_active`：Boolean，選填，預設 `true`

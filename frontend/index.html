@@ -3,21 +3,186 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>FastAPI Demo</title>
+    <title>FastAPI + SQLite Demo</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; }
+        section { margin-bottom: 24px; padding: 18px; border: 1px solid #ddd; border-radius: 8px; }
+        button, input { padding: 8px 12px; margin: 4px; }
+        button { cursor: pointer; }
+        label { display: inline-block; margin: 8px; }
+        #result { padding: 14px; background: #f3f4f6; border-radius: 8px; }
+    </style>
 </head>
 <body>
-    <h1>Hello FastAPI</h1>
-    <button data-url="/api/hello">呼叫 API 1</button>
-    <button data-url="/api/api2">呼叫 API 2</button>
-    <p id="result">尚未呼叫 API</p>
+    <h1>FastAPI + SQLite Demo</h1>
+
+    <section>
+        <h2>純 API</h2>
+        <button data-api="/api/hello">呼叫 Hello API</button>
+        <button data-api="/api/api2">呼叫 API 2</button>
+    </section>
+
+    <section>
+        <h2>Database API</h2>
+        <button id="create-db">建立 DB</button>
+        <button id="check-db">檢查 DB</button>
+        <button id="delete-db">刪除 DB</button>
+    </section>
+
+    <section>
+        <h2>Table API</h2>
+        <p>操作 SQLite 裡的 <code>items</code> Table。</p>
+        <button id="create-table">建立／更新 Table</button>
+        <button id="check-table">檢查 Table</button>
+        <button id="delete-table">刪除 Table</button>
+    </section>
+
+    <section>
+        <h2>Item API</h2>
+        <p>Item 包含 String、Integer、Float、Boolean。</p>
+        <div>
+            <input id="item-id" type="number" min="1" placeholder="Item ID（修改／刪除用）">
+            <input id="item-name" placeholder="名稱 String">
+            <input id="item-quantity" type="number" min="0" placeholder="數量 Integer（預設 0）">
+            <input id="item-price" type="number" min="0" step="0.01" placeholder="價格 Float（預設 0）">
+            <label><input id="item-active" type="checkbox" checked>啟用 Boolean</label>
+        </div>
+        <div>
+            <button id="create-item">新增 Item</button>
+            <button id="read-items">查詢 Item</button>
+            <button id="update-item">修改 Item</button>
+            <button id="delete-item">刪除 Item</button>
+        </div>
+        <ul id="items"></ul>
+    </section>
+
+    <p id="result">尚未操作</p>
 
     <script>
-        document.querySelectorAll("button[data-url]").forEach((button) => {
+        const result = document.querySelector("#result");
+        const itemList = document.querySelector("#items");
+
+        async function request(url, options = {}) {
+            const response = await fetch(url, options);
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || `HTTP ${response.status}`);
+            return data;
+        }
+
+        function showError(error) {
+            result.textContent = `錯誤：${error.message}`;
+        }
+
+        function itemPayload() {
+            const payload = {
+                name: document.querySelector("#item-name").value,
+                is_active: document.querySelector("#item-active").checked,
+            };
+            const quantity = document.querySelector("#item-quantity").value;
+            const price = document.querySelector("#item-price").value;
+            if (quantity !== "") payload.quantity = Number(quantity);
+            if (price !== "") payload.price = Number(price);
+            return payload;
+        }
+
+        document.querySelectorAll("[data-api]").forEach((button) => {
             button.addEventListener("click", async () => {
-                const response = await fetch(button.dataset.url);
-                const data = await response.json();
-                document.querySelector("#result").textContent = data.message;
+                try {
+                    const data = await request(button.dataset.api);
+                    result.textContent = data.message;
+                } catch (error) { showError(error); }
             });
+        });
+
+        document.querySelector("#create-db").addEventListener("click", async () => {
+            try {
+                const data = await request("/api/database", { method: "POST" });
+                result.textContent = `${data.message}：${data.path}`;
+            } catch (error) { showError(error); }
+        });
+
+        document.querySelector("#check-db").addEventListener("click", async () => {
+            try {
+                const data = await request("/api/database");
+                result.textContent = data.exists ? `DB 存在：${data.path}` : `DB 不存在：${data.path}`;
+            } catch (error) { showError(error); }
+        });
+
+        document.querySelector("#delete-db").addEventListener("click", async () => {
+            if (!window.confirm("確定要刪除 DB 與全部資料嗎？")) return;
+            try {
+                const data = await request("/api/database", { method: "DELETE" });
+                itemList.replaceChildren();
+                result.textContent = data.message;
+            } catch (error) { showError(error); }
+        });
+
+        document.querySelector("#create-table").addEventListener("click", async () => {
+            try {
+                const data = await request("/api/table", { method: "POST" });
+                result.textContent = `${data.message}：${data.table}`;
+            } catch (error) { showError(error); }
+        });
+
+        document.querySelector("#check-table").addEventListener("click", async () => {
+            try {
+                const data = await request("/api/table");
+                result.textContent = data.exists ? `Table 存在：${data.table}` : `Table 不存在：${data.table}`;
+            } catch (error) { showError(error); }
+        });
+
+        document.querySelector("#delete-table").addEventListener("click", async () => {
+            if (!window.confirm("確定要刪除 items Table 與全部 Item 嗎？")) return;
+            try {
+                const data = await request("/api/table", { method: "DELETE" });
+                itemList.replaceChildren();
+                result.textContent = data.message;
+            } catch (error) { showError(error); }
+        });
+
+        async function readItems() {
+            const data = await request("/api/items");
+            itemList.replaceChildren(...data.map((item) => {
+                const li = document.createElement("li");
+                li.textContent = `ID ${item.id}｜${item.name}｜數量 ${item.quantity}｜價格 ${item.price}｜啟用 ${item.is_active}`;
+                return li;
+            }));
+            result.textContent = `查詢完成，共 ${data.length} 筆 Item`;
+        }
+
+        document.querySelector("#create-item").addEventListener("click", async () => {
+            try {
+                await request("/api/items", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(itemPayload()),
+                });
+                await readItems();
+            } catch (error) { showError(error); }
+        });
+
+        document.querySelector("#read-items").addEventListener("click", async () => {
+            try { await readItems(); } catch (error) { showError(error); }
+        });
+
+        document.querySelector("#update-item").addEventListener("click", async () => {
+            try {
+                const id = document.querySelector("#item-id").value;
+                await request(`/api/items/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(itemPayload()),
+                });
+                await readItems();
+            } catch (error) { showError(error); }
+        });
+
+        document.querySelector("#delete-item").addEventListener("click", async () => {
+            try {
+                const id = document.querySelector("#item-id").value;
+                await request(`/api/items/${id}`, { method: "DELETE" });
+                await readItems();
+            } catch (error) { showError(error); }
         });
     </script>
 </body>

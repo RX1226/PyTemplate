@@ -1,2 +1,5 @@
+#Fastapi框架
 fastapi
 uvicorn
+#DB套件, 方便之後轉PostgreSQL
+sqlalchemy

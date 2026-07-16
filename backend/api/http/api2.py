@@ -1,3 +1,5 @@
+"""提供第二支不存取資料庫的 API 範例。"""
+
 from fastapi import APIRouter
 
 router = APIRouter()

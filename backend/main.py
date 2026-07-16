@@ -1,3 +1,5 @@
+"""建立 FastAPI 應用程式，掛載所有 API 與前端靜態頁面。"""
+
 from pathlib import Path
 
 from fastapi import FastAPI
