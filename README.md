@@ -1,4 +1,4 @@
-# FastAPI + SQLite Demo
+# FastAPI + SQLite + AI Demo
 
 這個專案示範三種類型的 API：
 
