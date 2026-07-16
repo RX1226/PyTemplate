@@ -23,6 +23,13 @@
     </section>
 
     <section>
+        <h2>AI API</h2>
+        <input id="ai-message" placeholder="輸入想問 Gemini 的問題">
+        <button id="ask-ai">送出問題</button>
+        <p id="ai-reply">尚未提問</p>
+    </section>
+
+    <section>
         <h2>Database API</h2>
         <button id="create-db">建立 DB</button>
         <button id="check-db">檢查 DB</button>
@@ -61,6 +68,7 @@
     <script>
         const result = document.querySelector("#result");
         const itemList = document.querySelector("#items");
+        const aiReply = document.querySelector("#ai-reply");
 
         async function request(url, options = {}) {
             const response = await fetch(url, options);
@@ -92,6 +100,22 @@
                     result.textContent = data.message;
                 } catch (error) { showError(error); }
             });
+        });
+
+        document.querySelector("#ask-ai").addEventListener("click", async () => {
+            aiReply.textContent = "Gemini 回答中…";
+            try {
+                const data = await request("/api/ai/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        message: document.querySelector("#ai-message").value,
+                    }),
+                });
+                aiReply.textContent = data.reply;
+            } catch (error) {
+                aiReply.textContent = `錯誤：${error.message}`;
+            }
         });
 
         document.querySelector("#create-db").addEventListener("click", async () => {

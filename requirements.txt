@@ -3,3 +3,7 @@ fastapi
 uvicorn
 #DB套件, 方便之後轉PostgreSQL
 sqlalchemy
+#讀取環境變數
+python-dotenv
+#ai
+langchain-google-genai
